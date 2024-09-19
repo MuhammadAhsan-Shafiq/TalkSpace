@@ -1,4 +1,5 @@
 import SwiftUI
+import AVFAudio
 import FirebaseAuth
 import FirebaseFirestore
 import FirebaseFirestoreCombineSwift
@@ -8,26 +9,29 @@ import FirebaseStorage
 struct Message: Identifiable, Equatable, Codable {
     let id: String
     let text: String
-    let isSentByCurrentUser: Bool
+    let isCurrentUser: Bool
     let timestamp: Timestamp
     let imageUrl: String? // Add image url for image messages
+    var voiceNoteUrl: String? // add voice note url
     
     // enum to define keys for decoding and encoding to Firestore
     enum CodingKeys: String, CodingKey {
         case id
         case text
-        case isSentByCurrentUser
+        case isCurrentUser
         case timestamp
         case imageUrl
+        case voiceNoteUrl
     }
     
     // Firestore requires an empty initializer for decoding
-    init(id: String = UUID().uuidString, text: String, isSentByCurrentUser: Bool, timestamp: Timestamp = Timestamp(), imageUrl: String? = nil) {
+    init(id: String = UUID().uuidString, text: String, isCurrentUser: Bool, timestamp: Timestamp = Timestamp(), imageUrl: String? = nil, voiceNoteUrl: String? = nil) {
         self.id = id
         self.text = text
-        self.isSentByCurrentUser = isSentByCurrentUser
+        self.isCurrentUser = isCurrentUser
         self.timestamp = timestamp
         self.imageUrl = imageUrl
+        self.voiceNoteUrl = voiceNoteUrl
     }
 }
 
@@ -40,6 +44,10 @@ struct ChatView: View {
     @State private var isCurrentUser: Bool = true // Track sender or receiver
     @State private var selectedImage: UIImage? // for image selection
     @State private var showImagePicker: Bool = false // to show image picker
+    @State private var isRecording: Bool = false
+    @State private var recordedAudioURL: URL?
+    @State private var isPlaying = false
+    @State private var audioPlayer: AVAudioPlayer?
     @Environment(\.presentationMode) var presentationMode
     @State private var listner: ListenerRegistration? // Firestore listner
     
@@ -70,7 +78,8 @@ struct ChatView: View {
             }
             
             // Step: 3 - Chat Input with image picker button
-            ChatInputView(message: $message, onSend:  {
+            ChatInputView(message: $message,
+                          onSend:  {
                 if let selectedImage = selectedImage{
                     uploadImage(selectedImage) { result in
                         switch result {
@@ -80,10 +89,28 @@ struct ChatView: View {
                             print("print error uploading image: \(error.localizedDescription)")
                         }
                     }
-                }else {
+                }else if let recordedAudioURL = recordedAudioURL {
+                    uploadAudio(recordedAudioURL){ result in
+                        switch result {
+                        case .success(let audioUrl):
+                            sendMessage(imageUrl: nil, voiceNoteUrl: audioUrl)
+                        case .failure(let error):
+                            print("Error uploading audio: \(error.localizedDescription)")
+                        }
+                    }
+                } else{
                     sendMessage()
                 }
-            }, showImagePicker: $showImagePicker)
+            }, showImagePicker: $showImagePicker,
+                          isRecording: $isRecording,
+                          onRecordToggle: {
+                if isRecording {
+                    stopRecording()
+                } else {
+                    startRecording()
+                }
+            }
+            )
         }
         .gesture(tapToDismissKeyboard)// apply geture to dismiss keyboard
         .onAppear{
@@ -100,20 +127,52 @@ struct ChatView: View {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
                     presentationMode.wrappedValue.dismiss()
-                }, label: {
+                }){
                     Image(systemName: "chevron.left")
                         .font(.headline)
                         .foregroundColor(.blue)
-                })
+                }
             }
         }
     }
+    private func startRecording() {
+        // Start recording audio
+    }
     
-    //MARK: - Gesture to dismiss the keyboard
-    var tapToDismissKeyboard: some Gesture {
-        TapGesture().onEnded{
-            hideKeyboard()
+    private func stopRecording() {
+        // Stop recording audio and get the URL
+        // Assign recordedAudioURL
+    }
+    
+    private func uploadAudio(_ url: URL, completion: @escaping(Result<String, Error>) -> Void) {
+            // Upload audio file to Firebase Storage
         }
+    
+    // MARK: send message (text or image)
+    private func sendMessage(imageUrl: String? = nil, voiceNoteUrl: String? = nil) {
+        guard let currentUserId = getCurrentUserId(), !message.isEmpty || imageUrl != nil  else { return }
+        
+        let newMessage = Message(text: message, isCurrentUser: isCurrentUser, imageUrl: imageUrl, voiceNoteUrl: voiceNoteUrl)
+        
+        // Save the message to Firestore
+        let messageRef = db.collection("users").document(currentUserId)
+            .collection("chats").document(chatId)
+            .collection("messages").document(newMessage.id)
+        
+        do {
+            try messageRef.setData(from: newMessage)
+        } catch let error {
+            print("Error saving message: \(error.localizedDescription)")
+        }
+        
+        // Update last message timestamp in the chat document
+        updateLastMessageTimestamp()
+        
+        // Clear the message field and switch sender
+        message = ""
+        selectedImage = nil
+        recordedAudioURL = nil
+        isCurrentUser.toggle()
     }
     
     //MARK: Load Message from Firestore
@@ -138,30 +197,10 @@ struct ChatView: View {
             }
     }
     
-    // MARK: send message (text or image)
-    private func sendMessage(imageUrl: String? = nil) {
-        guard let currentUserId = getCurrentUserId(), !message.isEmpty || imageUrl != nil  else { return }
+    // MARK: Get current user id
+    private func getCurrentUserId() -> String? {
+        return Auth.auth().currentUser?.uid
         
-        let newMessage = Message(text: message, isSentByCurrentUser: isCurrentUser, imageUrl: imageUrl)
-        
-        // Save the message to Firestore
-        let messageRef = db.collection("users").document(currentUserId)
-            .collection("chats").document(chatId)
-            .collection("messages").document(newMessage.id)
-        
-        do {
-            try messageRef.setData(from: newMessage)
-        } catch let error {
-            print("Error saving message: \(error.localizedDescription)")
-        }
-        
-        // Update last message timestamp in the chat document
-        updateLastMessageTimestamp()
-        
-        // Clear the message field and switch sender
-        message = ""
-        selectedImage = nil
-        isCurrentUser.toggle()
     }
     
     // MARK: Update chat TimeStamp
@@ -180,12 +219,6 @@ struct ChatView: View {
                 print("Error updating chat timestamp: \(error.localizedDescription)")
             }
         }
-    }
-    
-    // MARK: Get current user id
-    private func getCurrentUserId() -> String? {
-        return Auth.auth().currentUser?.uid
-        
     }
     
     // MARK: upload image to firebase storage
@@ -212,12 +245,20 @@ struct ChatView: View {
             }
         }
     }
+    
     // MARK: Hide Keyboard
     private func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
-}
     
+    //MARK: - Gesture to dismiss the keyboard
+    var tapToDismissKeyboard: some Gesture {
+        TapGesture().onEnded{
+            hideKeyboard()
+        }
+    }
+}
+
 // MARK: - User Header View
 struct UserHeaderView: View {
     let user: User
@@ -254,7 +295,7 @@ struct MessageBubbleView: View {
     let message: Message
     var body: some View {
         HStack {
-            if message.isSentByCurrentUser {
+            if message.isCurrentUser {
                 Spacer()
             }
             // Step: 10 - show image if available otherwise show text
@@ -270,7 +311,7 @@ struct MessageBubbleView: View {
             } else {
                 Text(message.text)
                     .padding()
-                    .background(message.isSentByCurrentUser ? Color.blue : Color.gray)
+                    .background(message.isCurrentUser ? Color.blue : Color.gray)
                     .foregroundColor(.white)
                     .cornerRadius(10)
                     .shadow(radius: 5)
@@ -278,7 +319,7 @@ struct MessageBubbleView: View {
                     .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true) // Prevent text from truncating
             }
-            if !message.isSentByCurrentUser {
+            if !message.isCurrentUser {
                 Spacer()
             }
         }
@@ -291,6 +332,9 @@ struct ChatInputView: View {
     @Binding var message: String
     var onSend: () -> Void
     @Binding var showImagePicker: Bool
+    @Binding var isRecording: Bool // new binding for voice note recorder
+    var onRecordToggle: () -> Void
+    
     var body: some View {
         HStack {
             Button(action: {
@@ -312,6 +356,18 @@ struct ChatInputView: View {
                 .cornerRadius(10)
             
             Spacer()
+            
+            Button(action:{
+                isRecording.toggle()
+                onRecordToggle()
+            }){
+                Image(systemName: isRecording ? "stop.fill" : "mic.fill")
+                    .font(.system(size: 24))
+                    .foregroundColor(.black)
+            }
+            .padding(.trailing)
+            .background(Color.white.opacity(0.2))
+            .cornerRadius(10)
             
             Button(action: onSend) {
                 Image(systemName: "paperplane.fill")

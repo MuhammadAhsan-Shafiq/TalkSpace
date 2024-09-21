@@ -19,6 +19,7 @@
 		525A0AB02C8723C200AFFD44 /* SignUpScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525A0AAF2C8723C200AFFD44 /* SignUpScreenView.swift */; };
 		525A0AB22C88358600AFFD44 /* UsersScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525A0AB12C88358600AFFD44 /* UsersScreenView.swift */; };
 		525A0AB42C88406300AFFD44 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525A0AB32C88406300AFFD44 /* ChatView.swift */; };
+		529C04B02C9D7E3800CEEBED /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529C04AF2C9D7E3800CEEBED /* ChatViewModel.swift */; };
 		52B35AB42C9B1A19007987B6 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 52B35AB32C9B1A19007987B6 /* FirebaseStorage */; };
 /* End PBXBuildFile section */
 
@@ -34,6 +35,7 @@
 		525A0AAF2C8723C200AFFD44 /* SignUpScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpScreenView.swift; sourceTree = "<group>"; };
 		525A0AB12C88358600AFFD44 /* UsersScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsersScreenView.swift; sourceTree = "<group>"; };
 		525A0AB32C88406300AFFD44 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		529C04AF2C9D7E3800CEEBED /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +78,7 @@
 				525A0AB12C88358600AFFD44 /* UsersScreenView.swift */,
 				520E2EA32C91DB02008AD313 /* SessionManager.swift */,
 				525A0AB32C88406300AFFD44 /* ChatView.swift */,
+				529C04AF2C9D7E3800CEEBED /* ChatViewModel.swift */,
 				525A0AAF2C8723C200AFFD44 /* SignUpScreenView.swift */,
 				525A0AA12C87198700AFFD44 /* Assets.xcassets */,
 				520E2E9A2C90569C008AD313 /* GoogleService-Info.plist */,
@@ -173,6 +176,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				525A0AAC2C871C4C00AFFD44 /* LoginScreenView.swift in Sources */,
+				529C04B02C9D7E3800CEEBED /* ChatViewModel.swift in Sources */,
 				525A0AB02C8723C200AFFD44 /* SignUpScreenView.swift in Sources */,
 				520E2EA42C91DB02008AD313 /* SessionManager.swift in Sources */,
 				525A0AB22C88358600AFFD44 /* UsersScreenView.swift in Sources */,
@@ -314,6 +318,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TalkSpace/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to your microphone for recording voice notes";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -343,6 +348,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TalkSpace/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to your microphone for recording voice notes";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

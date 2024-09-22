@@ -8,12 +8,12 @@ import FirebaseStorage
 // MARK: - Message Model
 struct Message: Codable, Identifiable,Equatable {
     @DocumentID var id: String?
-    var text: String?
-    var imageUrl: String?
-    var voiceNoteUrl: String?
-    var isCurrentUser: Bool
-    var senderId: String // Ensure this property exists
-    var timestamp: Timestamp
+       var text: String?
+       var imageUrl: String?
+       var voiceNoteUrl: String?
+       var isCurrentUser: Bool
+       var senderId: String
+       var timestamp: Timestamp
     
     // Custom initializer (if needed)
     init(id: String? = nil, text: String? = nil, imageUrl: String? = nil, voiceNoteUrl: String? = nil, isCurrentUser: Bool, senderId: String, timestamp: Timestamp = Timestamp(date: Date())) {
@@ -51,7 +51,7 @@ struct ChatView: View {
                 ScrollView {
                     VStack {
                         ForEach(viewModel.messages) { message in
-                            MessageBubbleView(message: message)
+                            MessageBubbleView(message: message, viewModel: viewModel) // Pass the viewModel
                         }
                         Color.clear
                             .id("bottom")
@@ -63,6 +63,7 @@ struct ChatView: View {
                         }
                     }
                 }
+
             }
             
             ChatInputView(
@@ -158,36 +159,73 @@ struct UserHeaderView: View {
 // MARK: - Message Bubble View
 struct MessageBubbleView: View {
     let message: Message
+        @ObservedObject var viewModel: ChatViewModel // Add this line
     
     var body: some View {
         HStack {
-            // Check if the message is from the current user
-            if message.isCurrentUser {
-                Spacer() // Push sent messages to the right side
-                Text(message.text ?? "")
-                    .padding()
-                    .background(Color.blue) // Sent message color
-                    .foregroundColor(.white)
+                    if message.isCurrentUser {
+                        Spacer()
+                        bubbleContent
+                            .onTapGesture {
+                                // Tap to play voice note if available
+                                if let voiceNoteUrl = message.voiceNoteUrl {
+                                    viewModel.playVoiceNote(url: voiceNoteUrl)
+                                }
+                            }
+                    } else {
+                        bubbleContent
+                            .onTapGesture {
+                                // Tap to play voice note if available
+                                if let voiceNoteUrl = message.voiceNoteUrl {
+                                    viewModel.playVoiceNote(url: voiceNoteUrl)
+                                }
+                            }
+                        Spacer()
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: message.isCurrentUser ? .trailing : .leading)
+                .padding(.horizontal)
+            }
+    @ViewBuilder
+    private var bubbleContent: some View{
+        if let text = message.text {
+            Text(text)
+                .padding()
+                .background(message.isCurrentUser ? Color.blue : Color.gray) // Sent message color
+                .foregroundColor(.white)
+                .cornerRadius(15)
+              //  .padding(.leading, 50)
+                .padding(.trailing, 10) // Adjust right padding for sent messages
+                .padding(.vertical, 5)
+        } else if let imageUrl = message.imageUrl {
+            AsyncImage(url: URL(string: imageUrl)) { image in
+                image
+                    .resizable()
+                    .scaledToFit()
                     .cornerRadius(15)
-                    .padding(.leading, 50)
-                    .padding(.trailing, 10) // Adjust right padding for sent messages
+                    .frame(width: 200, height: 200)
                     .padding(.vertical, 5)
-            } else {
-                Text(message.text ?? "")
-                    .padding()
-                    .background(Color.gray) // Received message color
-                    .foregroundColor(.white)
-                    .cornerRadius(15)
-                    .padding(.trailing, 50)
-                    .padding(.leading, 10) // Adjust left padding for received messages
-                    .padding(.vertical, 5)
-                Spacer() // Push received messages to the left side
+            } placeholder: {
+                ProgressView()
+            }
+        } else if let voiceNoteUrl = message.voiceNoteUrl {
+            Button(action: {
+                viewModel.playVoiceNote(url: voiceNoteUrl)
+            }){
+                HStack{
+                    Image(systemName: "waveform")
+                    Text("Voice Note")
+                }
+                .padding()
+                .background(message.isCurrentUser ? Color.blue : Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(15)
+                .padding(.vertical, 5)
             }
         }
-        .frame(maxWidth: .infinity, alignment: message.isCurrentUser ? .trailing : .leading)
-        .padding(.horizontal)
     }
 }
+              
 
 
 // MARK: - Chat Input View

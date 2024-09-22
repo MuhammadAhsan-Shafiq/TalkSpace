@@ -13,6 +13,7 @@ class ChatViewModel: ObservableObject {
 
     private var db = Firestore.firestore()
     private var listner: ListenerRegistration?
+    private var audioPlayer: AVAudioPlayer?
     private var audioRecorder: AVAudioRecorder?
     
     // MARK: Load messages from Firestore
@@ -138,4 +139,14 @@ class ChatViewModel: ObservableObject {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         return paths[0]
     }
+    func playVoiceNote(url: String) {
+           guard let url = URL(string: url) else { return }
+
+           do {
+               audioPlayer = try AVAudioPlayer(contentsOf: url)
+               audioPlayer?.play()
+           } catch {
+               print("Error playing voice note: \(error.localizedDescription)")
+           }
+       }
 }

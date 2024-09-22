@@ -12,6 +12,12 @@
 		520E2EA02C905D9C008AD313 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 520E2E9F2C905D9C008AD313 /* FirebaseFirestore */; };
 		520E2EA22C90DA5E008AD313 /* FirebaseFirestoreCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 520E2EA12C90DA5E008AD313 /* FirebaseFirestoreCombine-Community */; };
 		520E2EA42C91DB02008AD313 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520E2EA32C91DB02008AD313 /* SessionManager.swift */; };
+		524CBB732CA02C2500D0F4ED /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CBB722CA02C2500D0F4ED /* Message.swift */; };
+		524CBB772CA02D6200D0F4ED /* UserHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CBB762CA02D6200D0F4ED /* UserHeaderView.swift */; };
+		524CBB792CA02E9200D0F4ED /* MessageBubbleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CBB782CA02E9200D0F4ED /* MessageBubbleView.swift */; };
+		524CBB7B2CA02FA000D0F4ED /* ChatInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CBB7A2CA02FA000D0F4ED /* ChatInputView.swift */; };
+		524CBB7D2CA0301300D0F4ED /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CBB7C2CA0301300D0F4ED /* ImagePicker.swift */; };
+		524CBB802CA030B200D0F4ED /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CBB7F2CA030B200D0F4ED /* Extensions.swift */; };
 		525A0A9E2C87198500AFFD44 /* TalkSpaceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525A0A9D2C87198500AFFD44 /* TalkSpaceApp.swift */; };
 		525A0AA22C87198700AFFD44 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 525A0AA12C87198700AFFD44 /* Assets.xcassets */; };
 		525A0AA52C87198700AFFD44 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 525A0AA42C87198700AFFD44 /* Preview Assets.xcassets */; };
@@ -26,6 +32,12 @@
 /* Begin PBXFileReference section */
 		520E2E9A2C90569C008AD313 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		520E2EA32C91DB02008AD313 /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
+		524CBB722CA02C2500D0F4ED /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		524CBB762CA02D6200D0F4ED /* UserHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserHeaderView.swift; sourceTree = "<group>"; };
+		524CBB782CA02E9200D0F4ED /* MessageBubbleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageBubbleView.swift; sourceTree = "<group>"; };
+		524CBB7A2CA02FA000D0F4ED /* ChatInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatInputView.swift; sourceTree = "<group>"; };
+		524CBB7C2CA0301300D0F4ED /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
+		524CBB7F2CA030B200D0F4ED /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		525A0A9A2C87198500AFFD44 /* TalkSpace.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TalkSpace.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		525A0A9D2C87198500AFFD44 /* TalkSpaceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalkSpaceApp.swift; sourceTree = "<group>"; };
 		525A0AA12C87198700AFFD44 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -53,6 +65,42 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		524CBB712CA02C0500D0F4ED /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				524CBB722CA02C2500D0F4ED /* Message.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		524CBB742CA02CFC00D0F4ED /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				529C04AF2C9D7E3800CEEBED /* ChatViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		524CBB752CA02D2300D0F4ED /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				525A0AB32C88406300AFFD44 /* ChatView.swift */,
+				524CBB762CA02D6200D0F4ED /* UserHeaderView.swift */,
+				524CBB782CA02E9200D0F4ED /* MessageBubbleView.swift */,
+				524CBB7C2CA0301300D0F4ED /* ImagePicker.swift */,
+				524CBB7A2CA02FA000D0F4ED /* ChatInputView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		524CBB7E2CA0308800D0F4ED /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				524CBB7F2CA030B200D0F4ED /* Extensions.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		525A0A912C87198500AFFD44 = {
 			isa = PBXGroup;
 			children = (
@@ -72,13 +120,15 @@
 		525A0A9C2C87198500AFFD44 /* TalkSpace */ = {
 			isa = PBXGroup;
 			children = (
+				524CBB7E2CA0308800D0F4ED /* Extensions */,
+				524CBB752CA02D2300D0F4ED /* Views */,
+				524CBB742CA02CFC00D0F4ED /* ViewModels */,
+				524CBB712CA02C0500D0F4ED /* Models */,
 				525A0AAE2C871EAA00AFFD44 /* Info.plist */,
 				525A0A9D2C87198500AFFD44 /* TalkSpaceApp.swift */,
 				525A0AAB2C871C4C00AFFD44 /* LoginScreenView.swift */,
 				525A0AB12C88358600AFFD44 /* UsersScreenView.swift */,
 				520E2EA32C91DB02008AD313 /* SessionManager.swift */,
-				525A0AB32C88406300AFFD44 /* ChatView.swift */,
-				529C04AF2C9D7E3800CEEBED /* ChatViewModel.swift */,
 				525A0AAF2C8723C200AFFD44 /* SignUpScreenView.swift */,
 				525A0AA12C87198700AFFD44 /* Assets.xcassets */,
 				520E2E9A2C90569C008AD313 /* GoogleService-Info.plist */,
@@ -179,8 +229,14 @@
 				529C04B02C9D7E3800CEEBED /* ChatViewModel.swift in Sources */,
 				525A0AB02C8723C200AFFD44 /* SignUpScreenView.swift in Sources */,
 				520E2EA42C91DB02008AD313 /* SessionManager.swift in Sources */,
+				524CBB792CA02E9200D0F4ED /* MessageBubbleView.swift in Sources */,
 				525A0AB22C88358600AFFD44 /* UsersScreenView.swift in Sources */,
+				524CBB7B2CA02FA000D0F4ED /* ChatInputView.swift in Sources */,
+				524CBB732CA02C2500D0F4ED /* Message.swift in Sources */,
+				524CBB802CA030B200D0F4ED /* Extensions.swift in Sources */,
 				525A0AB42C88406300AFFD44 /* ChatView.swift in Sources */,
+				524CBB7D2CA0301300D0F4ED /* ImagePicker.swift in Sources */,
+				524CBB772CA02D6200D0F4ED /* UserHeaderView.swift in Sources */,
 				525A0A9E2C87198500AFFD44 /* TalkSpaceApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

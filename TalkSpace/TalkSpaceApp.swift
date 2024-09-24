@@ -11,10 +11,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 @main
 struct TalkSpaceApp: App {
     @StateObject private var sessionManager = SessionManager()
-    
     // Register AppDelegate for Firebase setup
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -25,6 +23,8 @@ struct TalkSpaceApp: App {
 
 struct ContentView: View {
     @EnvironmentObject var sessionManager: SessionManager
+    @StateObject private var authViewModel = AuthViewModel(sessionManager: SessionManager()) // Initialize the AuthViewModel
+       
     
     var body: some View {
         Group {
@@ -32,7 +32,7 @@ struct ContentView: View {
                 UsersScreenView()
                     .environmentObject(sessionManager)
             } else {
-                LoginScreenView()
+                LoginScreenView(viewModel: authViewModel)
                     .environmentObject(sessionManager)
             }
         }

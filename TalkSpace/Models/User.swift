@@ -13,6 +13,8 @@ struct User: Identifiable, Decodable {
     @DocumentID var id: String?
     let name: String
     let email: String
+    var isTyping: Bool? = false
+    var isRecording: Bool? = false
     
     // get the first letter of each word in the name and joins them up as initials
     var initials: String {

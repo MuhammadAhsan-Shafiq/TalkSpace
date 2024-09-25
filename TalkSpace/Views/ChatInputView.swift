@@ -14,6 +14,7 @@ struct ChatInputView: View {
     @Binding var showImagePicker: Bool
     @Binding var isRecording: Bool
     var onRecordToggle: () -> Void
+    var onTypingChange: (Bool) -> Void // New callback for typing status
     
     var body: some View {
         HStack {
@@ -24,7 +25,8 @@ struct ChatInputView: View {
             }
             .padding(.leading)
             
-            TextField("Message...", text: $message)
+            TextField("Message...", text: $message, onEditingChanged: {isEditing in
+                onTypingChange(isEditing)})
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .frame(minHeight: 30)
                 .padding(5)
@@ -67,7 +69,3 @@ struct ChatInputView: View {
 }
 
 
-// Preview for ChatInputView
-#Preview {
-    ChatInputView(message: .constant(""), onSend: {}, showImagePicker: .constant(false), isRecording: .constant(false), onRecordToggle: {})
-}

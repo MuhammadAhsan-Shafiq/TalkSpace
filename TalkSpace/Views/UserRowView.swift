@@ -25,10 +25,30 @@ struct UserRowView: View {
             VStack(alignment: .leading) {
                 Text(user.name)
                     .font(.headline)
+                
+                // conditional display of typing and recording status
+                HStack{
+                    if user.isTyping ?? false {
+                        Text("Typing...")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .padding(2)
+                    }
+                    if user.isRecording ?? false {
+                        Text("Recording audio...")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .padding(2)
+                    }
+                }
             }
+            .padding(.leading, 8)
+            
+            Spacer() // to push the content to leading side
         }
+        .padding()
     }
 }
 #Preview {
-    UserRowView(user: User(id: "", name: "hello world", email: ""))
+    UserRowView(user: User(id: "1", name: "John Doe", email: "john@example.com", isTyping: true, isRecording: false))
 }

@@ -31,7 +31,7 @@ struct SignUpScreenView: View {
                                 keyboardType: .emailAddress
                             )
                             ValidationRequirement(text: "Invalid Email Address", isValid: viewModel.isEmailValid)
-
+                            
                             CustomInputField(
                                 icon: "lock.fill",
                                 placeholder: "Enter Your Password",
@@ -40,7 +40,7 @@ struct SignUpScreenView: View {
                                 isPasswordVisible: viewModel.isPasswordVisible,
                                 toggleVisibility: { viewModel.isPasswordVisible.toggle() }
                             )
-
+                            
                             ValidationRequirement(text: "At least one uppercase letter", isValid: viewModel.hasUppercase)
                             ValidationRequirement(text: "At least one lowercase letter", isValid: viewModel.hasLowercase)
                             ValidationRequirement(text: "At least one digit", isValid: viewModel.hasDigit)
@@ -49,7 +49,7 @@ struct SignUpScreenView: View {
                             
                             HStack {
                                 Button(action: {
-                                    viewModel.signUpUser() // call the sign up action
+                                    viewModel.signUpUser()
                                 }, label: {
                                     if viewModel.isSignUp {
                                         ProgressView()
@@ -69,7 +69,7 @@ struct SignUpScreenView: View {
                                 .disabled(!viewModel.isFormValid || viewModel.isSignUp)
                                 .padding(.horizontal)
                             }
-
+                            
                             if let signUpError = viewModel.signUpError {
                                 Text(signUpError)
                                     .foregroundColor(.red)
@@ -90,7 +90,7 @@ struct SignUpScreenView: View {
                 }
                 .padding()
                 .onTapGesture {
-                    UIApplication.shared.dismissKeyboard()
+                    UIApplication.shared.hideKeyboard()
                 }
             }
         }

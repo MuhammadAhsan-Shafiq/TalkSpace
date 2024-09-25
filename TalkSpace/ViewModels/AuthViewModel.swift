@@ -7,6 +7,7 @@
 
 import Foundation
 import FirebaseAuth
+import FirebaseFirestore
 class AuthViewModel: ObservableObject {
     // shared properties for both sign-up and login
     @Published var email: String = ""
@@ -71,7 +72,7 @@ class AuthViewModel: ObservableObject {
         isEmailValid && isPasswordValid
     }
     
-    // MARK: SignUp Logic
+    // MARK: SignUp the user and save user data in firestore
     func signUpUser() {
         guard isFormValid else {
             signUpError = "Please provide a valid email and password and name"
@@ -79,17 +80,19 @@ class AuthViewModel: ObservableObject {
         }
         
         isAuthenticating = true
-        sessionManager.signUpUser(name: name, email: email, password: password){ [weak self] error in
+        sessionManager.signUpUser(name: name, email: email, password: password) { [weak self] error in
             guard let self = self else { return }
-            if let error = error{
+            if let error = error {
                 self.signUpError = error
             } else {
                 self.signInError = nil
-                self.signInUser()
+                self.signInUser() // Optionally sign in the user right after sign up
             }
             self.isAuthenticating = false
         }
     }
+
+    
     
     // MARK: Sign-In Logic
     func signInUser() {

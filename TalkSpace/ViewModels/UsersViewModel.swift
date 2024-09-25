@@ -5,9 +5,10 @@
 //  Created by MacBook Pro on 24/09/2024.
 //
 
-import Foundation
+import Combine
 import FirebaseFirestore
 import FirebaseAuth
+
 class UsersViewModel: ObservableObject {
     @Published var users: [User] = []
     @Published var isLoading: Bool = true
@@ -15,24 +16,32 @@ class UsersViewModel: ObservableObject {
     @Published var signInError: String?
     
     private let db = Firestore.firestore()
+    private var cancellables = Set<AnyCancellable>()
     
     init() {
         fetchUsers() //Fetch the list of user from firestore
         fetchCurrentUser() //  fetch the current the when the view model is initialized
+        listenForUserStatusChanges() // Start listening for user status update
     }
     
     // Fetch the current signed-in user
     private func fetchCurrentUser() {
         if let user = Auth.auth().currentUser {
             let userID = user.uid
+            print("Fetching user with UID: \(userID)") // Debugging line
             let userRef = db.collection("users").document(userID)
             
-            userRef.getDocument { document, error in
+            userRef.getDocument { [weak self] document, error in
+                guard let self = self else { return }
                 if let error = error {
+                    // Log the error for debugging
+                    
+                    print("Error fetching current user: \(error.localizedDescription)")
                     self.signInError = error.localizedDescription
                     return
                 }
                 
+                // Check if the document exists
                 if let document = document, document.exists, let fetchedUser = try? document.data(as: User.self) {
                     DispatchQueue.main.async {
                         self.currentUser = fetchedUser
@@ -41,8 +50,12 @@ class UsersViewModel: ObservableObject {
                     self.signInError = "User not found in Firestore"
                 }
             }
+        } else {
+            self.signInError = "User not authenticated"
         }
     }
+
+
     
     // Fetch all users from Firestore
     private func fetchUsers() {
@@ -68,6 +81,30 @@ class UsersViewModel: ObservableObject {
                     try? document.data(as: User.self)
                 }
                 self.isLoading = false
+            }
+        }
+    }
+    
+    //Listen for real time updates on user typing and recording status
+    private func listenForUserStatusChanges() {
+        db.collection("users").addSnapshotListener { [weak self] snapshot, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                print("Error listening for user status changes: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let documents = snapshot?.documents else { return }
+            for document in documents {
+                if let user = try? document.data(as: User.self) {
+                    // find the index of user and update thier typing/ recording status
+                    if let index = self.users.firstIndex(where: {$0.id == user.id}) {
+                        self.users[index] = user
+                    } else {
+                        self.users.append(user) // Add user if not already in the list
+                    }
+                }
             }
         }
     }

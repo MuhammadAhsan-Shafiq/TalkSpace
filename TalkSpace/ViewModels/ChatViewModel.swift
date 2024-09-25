@@ -9,41 +9,37 @@ import Combine
 class ChatViewModel: ObservableObject {
     @Published var messages: [Message] = []
     @Published var isRecording: Bool = false
+    @Published var isTyping: Bool = false
+    @Published var otherUserIsTyping: Bool = false
+    @Published var otherUserIsRecording: Bool = false
+    
     private var cancellables = Set<AnyCancellable>()
-
     private var db = Firestore.firestore()
-    private var listner: ListenerRegistration?
+    private var listener: ListenerRegistration?
+    private var typingListener: ListenerRegistration?
     private var audioPlayer: AVAudioPlayer?
     private var audioRecorder: AVAudioRecorder?
     
     // MARK: Load messages from Firestore
     func loadMessages(chatId: String) {
-        // stop any existing listener
-        listner?.remove()
-        
-        // listen for real-time updates
-        listner = db.collection("chats")
+        listener?.remove()
+        listener = db.collection("chats")
             .document(chatId)
             .collection("messages")
-            .order(by: "timestamp") // Ensure messages are ordered by timestamp
+            .order(by: "timestamp")
             .addSnapshotListener { [weak self] querySnapshot, error in
                 guard let documents = querySnapshot?.documents else {
-                    print("No message")
+                    print("No messages")
                     return
                 }
-                
-                // Map Firestore documents to Message objects and dynamically set isCurrentUser
                 self?.messages = documents.compactMap { doc -> Message? in
                     guard var message = try? doc.data(as: Message.self) else { return nil }
-                    
-                    // Create a local copy and modify it
                     message.isCurrentUser = message.senderId == self?.getCurrentUserId()
-                    
                     return message
                 }
-
             }
     }
+    
     
     // MARK: Function for sending message
     func sendMessage(text: String? = nil, imageUrl: String? = nil, voiceNoteUrl: String? = nil, chatId: String) {
@@ -53,7 +49,7 @@ class ChatViewModel: ObservableObject {
             text: text,
             imageUrl: imageUrl,
             voiceNoteUrl: voiceNoteUrl,
-            isCurrentUser: true,  // Always true when sending a message from the current user
+            isCurrentUser: true,
             senderId: currentUserId,
             timestamp: Timestamp(date: Date())
         )
@@ -65,13 +61,15 @@ class ChatViewModel: ObservableObject {
         }
     }
     
+    
     // MARK: Upload image function
     func uploadImage(image: UIImage, chatId: String) {
         let storageRef = Storage.storage().reference().child("chat_images/\(UUID().uuidString).jpg")
         guard let imageData = image.jpegData(compressionQuality: 0.8) else { return }
         
         storageRef.putData(imageData, metadata: nil) { [weak self] _, error in
-            guard error == nil else { String(describing: error)
+            guard error == nil else {
+                print("Error uploading image: \(String(describing: error))")
                 return
             }
             
@@ -85,7 +83,7 @@ class ChatViewModel: ObservableObject {
     // MARK: Start voice recording
     func startRecording() {
         let audioFilename = getDocumentsDirectory().appendingPathComponent("recording.m4a")
-        let settings = [
+        let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
             AVSampleRateKey: 12000,
             AVNumberOfChannelsKey: 1,
@@ -96,6 +94,7 @@ class ChatViewModel: ObservableObject {
             audioRecorder = try AVAudioRecorder(url: audioFilename, settings: settings)
             audioRecorder?.record()
             isRecording = true
+            updateRecordingStatus(isRecording: true) // Update recording status in Firestore
         } catch {
             print("Could not start recording: \(error.localizedDescription)")
         }
@@ -108,9 +107,45 @@ class ChatViewModel: ObservableObject {
         
         guard let url = audioRecorder?.url else { return completion(nil) }
         uploadVoiceNote(url: url, completion: completion)
+        updateRecordingStatus(isRecording: false) // Update recording status in Firestore
+    }
+    // MARK: Update Typing Status Function
+    func updateTypingStatus(isTyping: Bool) {
+        self.isTyping = isTyping
+        guard let currentUserId = getCurrentUserId() else { return }
+        
+        // Update Firestore with typing status for the current user
+        db.collection("users").document(currentUserId).updateData(["isTyping": isTyping]) { error in
+            if let error = error {
+                print("Error updating typing status: \(error)")
+            }
+        }
     }
     
-    // MARK: Upload voice note
+    // MARK: Update Recording Status Function
+    func updateRecordingStatus(isRecording: Bool) {
+        self.isRecording = isRecording
+        if let currentUserId = getCurrentUserId() {
+            db.collection("users").document(currentUserId).updateData(["isRecording": isRecording]) { error in
+                if let error = error {
+                    print("Error updating recording status: \(error)")
+                }
+            }
+        }
+    }
+    
+    // MARK: Listen for typing and recording status of other users
+    func listenForTypingAndRecording(userId: String) {
+        typingListener?.remove()
+        typingListener = db.collection("users").document(userId).addSnapshotListener { [weak self] documentSnapshot, error in
+            guard let data = documentSnapshot?.data() else { return }
+            self?.otherUserIsTyping = data["isTyping"] as? Bool ?? false
+            self?.otherUserIsRecording = data["isRecording"] as? Bool ?? false
+        }
+    }
+    
+    
+    // MARK: Upload Voice Note
     func uploadVoiceNote(url: URL, completion: @escaping (String?) -> Void) {
         guard let currentUserId = getCurrentUserId() else { return }
         
@@ -129,6 +164,7 @@ class ChatViewModel: ObservableObject {
         }
     }
     
+    
     // MARK: Get current user ID
     func getCurrentUserId() -> String? {
         return Auth.auth().currentUser?.uid
@@ -139,14 +175,16 @@ class ChatViewModel: ObservableObject {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         return paths[0]
     }
+    
+    // MARK: Play voice note
     func playVoiceNote(url: String) {
-           guard let url = URL(string: url) else { return }
-
-           do {
-               audioPlayer = try AVAudioPlayer(contentsOf: url)
-               audioPlayer?.play()
-           } catch {
-               print("Error playing voice note: \(error.localizedDescription)")
-           }
-       }
+        guard let url = URL(string: url) else { return }
+        
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.play()
+        } catch {
+            print("Error playing voice note: \(error.localizedDescription)")
+        }
+    }
 }

@@ -35,7 +35,7 @@ struct UsersScreenView: View {
                     List(viewModel.users) { user in
                         if user.email != viewModel.currentUser?.email { // Exclude the current user from the chat list
                             let chatId = viewModel.getChatId(with: user) // Generate chat ID
-                            NavigationLink(destination: ChatView(user: user, chatId: chatId)) {
+                            NavigationLink(destination: ChatView(user: user, otherUser: user, chatId: chatId)) {
                                 UserRowView(user: user)
                             }
                         }

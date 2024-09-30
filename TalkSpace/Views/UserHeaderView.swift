@@ -12,8 +12,16 @@ struct UserHeaderView: View {
     let user: User
     var isTyping: Bool
     var isRecording: Bool
+    var backAction: () -> Void // action to perform when back button is pressed
     var body: some View {
         HStack {
+            // back Button
+            Button(action: backAction ){
+                Image(systemName: "chevron.left")
+                    .foregroundColor(.blue)
+                    .font(.largeTitle)
+            }
+            .padding(.trailing, 10)
             Text(user.initials)
                 .font(.headline)
                 .foregroundColor(.white)
@@ -40,20 +48,23 @@ struct UserHeaderView: View {
                 }
             }
             Spacer()
-            Image(systemName: "ellipsis")
-                .rotationEffect(.degrees(90))
-                .font(.title2)
-                .fontWeight(.bold)
+            HStack(spacing: 10){
+                Image(systemName: "phone.badge.plus")
+                
+                Image(systemName: "ellipsis")
+                    .rotationEffect(.degrees(90))
+            }
+            .font(.title2)
+            .fontWeight(.bold)
         }
-        .padding()
-        .background(Color.black.opacity(0.1))
-        .cornerRadius(10)
-        .shadow(radius: 10)
+        .padding(.horizontal)
+        
+       // .shadow(radius: 10)
     }
 }
 
 
 // Preview for UserHeaderView
 #Preview {
-    UserHeaderView(user: User(name: "John Doe", email: "example"), isTyping:true, isRecording: false)
+    UserHeaderView(user: User(name: "John Doe", email: "example@gmail.com"), isTyping: true, isRecording: false, backAction: { })
 }

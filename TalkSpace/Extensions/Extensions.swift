@@ -12,3 +12,9 @@ extension UIApplication {
         sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
+
+extension String {
+    func boundingRect(with size: CGSize, options: NSStringDrawingOptions, attributes: [NSAttributedString.Key: Any]?, context: NSStringDrawingContext?) -> CGRect {
+        return (self as NSString).boundingRect(with: size, options: options, attributes: attributes, context: context)
+    }
+}

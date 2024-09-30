@@ -8,7 +8,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "CD601255-4154-45F9-B81D-BE27D42A8C02"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "TalkSpace/Models/SessionManager.swift"
@@ -17,22 +17,6 @@
             startingLineNumber = "96"
             endingLineNumber = "96"
             landmarkName = "fetchUserData(uid:completion:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "278E1E4A-9F0E-4B66-BD11-26D6E605D0D7"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "TalkSpace/ViewModels/UsersViewModel.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "50"
-            endingLineNumber = "50"
-            landmarkName = "fetchCurrentUser()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

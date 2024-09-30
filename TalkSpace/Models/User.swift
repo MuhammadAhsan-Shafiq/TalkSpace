@@ -9,7 +9,7 @@ import Foundation
 import FirebaseFirestore
 
 // User Model
-struct User: Identifiable, Decodable {
+struct User: Identifiable, Decodable, Hashable {
     @DocumentID var id: String?
     let name: String
     let email: String
@@ -19,7 +19,7 @@ struct User: Identifiable, Decodable {
     // get the first letter of each word in the name and joins them up as initials
     var initials: String {
         let nameComponents = name.split(separator: " ").map { String($0.prefix(1)) }
-        return nameComponents.joined()
+        return nameComponents.joined().uppercased()
     }
 }
 

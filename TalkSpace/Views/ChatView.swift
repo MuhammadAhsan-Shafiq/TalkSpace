@@ -21,103 +21,107 @@ struct ChatView: View {
     @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
-        VStack(alignment: .leading) {
-                    // User header showing other user and their typing/recording status
-                    UserHeaderView(user: otherUser, isTyping: viewModel.otherUserIsTyping, isRecording: viewModel.otherUserIsRecording)
-                    
-                    ScrollViewReader { scrollViewProxy in
-                        ScrollView {
-                            VStack {
-                                ForEach(viewModel.messages) { message in
-                                    MessageBubbleView(message: message, viewModel: viewModel)
-                                }
-                                Color.clear.id("bottom")
+        ZStack {
+            // Background color
+                       Color.yellow.opacity(0.1)
+                           .ignoresSafeArea() // Extend the color to the edges
+            VStack(alignment: .leading) {
+                UserHeaderView(user: otherUser,
+                               isTyping: viewModel.otherUserIsTyping,
+                               isRecording: viewModel.otherUserIsRecording,
+                               backAction: { presentationMode.wrappedValue.dismiss() })
+                .padding(.vertical,5)
+                .background(Color.white)
+                
+                ScrollViewReader { scrollViewProxy in
+                    ScrollView {
+                        VStack {
+                            ForEach(viewModel.messages) { message in
+                                MessageBubbleView(message: message, viewModel: viewModel)
                             }
-                            .padding(.bottom, 10)
-                            .onChange(of: viewModel.messages) { _ in
-                                withAnimation {
-                                    scrollViewProxy.scrollTo("bottom", anchor: .bottom)
-                                }
+                            Color.clear.id("bottom")
+                            //   .background(Color.yellow.opacity(0.1))
+                        }
+                        
+                        .padding(.bottom, 10)
+                        .onChange(of: viewModel.messages) { _ in
+                            withAnimation {
+                                scrollViewProxy.scrollTo("bottom", anchor: .bottom)
                             }
                         }
                     }
-                    
-            
-            ChatInputView(
-                           message: $message,
-                           onSend: sendMessageAction,
-                           showImagePicker: $showImagePicker,
-                           isRecording: $isUserRecording,
-                           onRecordToggle: toggleRecording,
-                           onTypingChange: { isTyping in
-                               isUserTyping = isTyping
-                               viewModel.updateTypingStatus(isTyping: isTyping) // Sync typing status with Firestore
-                           }
-                       )
-                   }
-                   .contentShape(Rectangle())
-                   .onTapGesture {
-                       hideKeyboard() // Hide the keyboard when tapping outside
-                   }
-                   .onAppear {
-                       viewModel.loadMessages(chatId: chatId)
-                       viewModel.listenForTypingAndRecording(userId: otherUser.id ?? "") // Listen for other user's status
-                   }
-                   .sheet(isPresented: $showImagePicker) {
-                       ImagePicker(selectedImage: $selectedImage)
-                           .onDisappear {
-                               if let selectedImage = selectedImage {
-                                   viewModel.uploadImage(image: selectedImage, chatId: chatId) // Upload selected image
-                               }
-                           }
-                   }
-                   .navigationBarBackButtonHidden()
-                   .toolbar {
-                       ToolbarItem(placement: .navigationBarLeading) {
-                           Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                               Image(systemName: "chevron.left")
-                                   .font(.headline)
-                                   .foregroundColor(.blue)
-                           }
-                       }
-                   }
-               }
-    
-    // MARK: - Send Message Action
-        private func sendMessageAction() {
-            viewModel.sendMessage(text: message, chatId: chatId)
-            message = "" // Reset the message field
-            isUserTyping = false // Reset typing status
-            viewModel.updateTypingStatus(isTyping: false) // Sync typing status with Firestore
-        }
-        
-        // MARK: - Toggle Voice Recording
-        private func toggleRecording() {
-            if isUserRecording {
-                viewModel.stopRecording { voiceNoteUrl in
-                    if let url = voiceNoteUrl {
-                        viewModel.sendMessage(voiceNoteUrl: url, chatId: chatId) // Send voice note message
-                    }
-                    isUserRecording = false
-                    viewModel.updateRecordingStatus(isRecording: false) // Sync recording status with Firestore
+                   // .background(Color.yellow.opacity(0.1))
                 }
-            } else {
-                viewModel.startRecording()
-                isUserRecording = true
-                viewModel.updateRecordingStatus(isRecording: true) // Sync recording status with Firestore
+                
+                ChatInputView(
+                    message: $message,
+                    onSend: sendMessageAction,
+                    showImagePicker: $showImagePicker,
+                    isRecording: $isUserRecording,
+                    onRecordToggle: toggleRecording,
+                    onTypingChange: { isTyping in
+                        isUserTyping = isTyping
+                        viewModel.updateTypingStatus(isTyping: isTyping)
+                    }
+                )
+               
             }
-        }
-        
-        // MARK: - Hide Keyboard
-        private func hideKeyboard() {
-            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            
+            .contentShape(Rectangle())
+            .onTapGesture {
+                hideKeyboard()
+            }
+            .onAppear {
+                viewModel.loadMessages(chatId: chatId)
+                viewModel.listenForTypingAndRecording(userId: otherUser.id ?? "")
+            }
+            .sheet(isPresented: $showImagePicker) {
+                ImagePicker(selectedImage: $selectedImage)
+                    .onDisappear {
+                        if let selectedImage = selectedImage {
+                            viewModel.uploadImage(image: selectedImage, chatId: chatId)
+                        }
+                    }
+            }
+            .navigationBarBackButtonHidden()
         }
     }
 
-    #Preview {
-        ChatView(
-            user: User(name: "Jane Doe", email: "example@gmail.com"),
-            otherUser: User(name: "John Doe", email: "john@gmail.com"),
-            chatId: "chat123"
-        )
+    // MARK: - Send Message Action
+    private func sendMessageAction() {
+        viewModel.sendMessage(text: message, chatId: chatId)
+        message = ""
+        isUserTyping = false
+        viewModel.updateTypingStatus(isTyping: false)
     }
+
+    // MARK: - Toggle Voice Recording
+    private func toggleRecording() {
+        if isUserRecording {
+            viewModel.stopRecording { voiceNoteUrl in
+                if let url = voiceNoteUrl {
+                    viewModel.sendMessage(voiceNoteUrl: url, chatId: chatId)
+                }
+                isUserRecording = false
+                viewModel.updateRecordingStatus(isRecording: false)
+            }
+        } else {
+            viewModel.startRecording()
+            isUserRecording = true
+            viewModel.updateRecordingStatus(isRecording: true)
+        }
+    }
+
+    // MARK: - Hide Keyboard
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+
+#Preview {
+    ChatView(
+        user: User(name: "Jane Doe", email: "example@gmail.com"),
+        otherUser: User(name: "John Doe", email: "john@gmail.com"),
+        chatId: "chat123"
+    )
+}

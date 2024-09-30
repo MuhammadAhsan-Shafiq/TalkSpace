@@ -1,10 +1,3 @@
-//
-//  UserViewModel.swift
-//  TalkSpace
-//
-//  Created by MacBook Pro on 24/09/2024.
-//
-
 import Combine
 import FirebaseFirestore
 import FirebaseAuth
@@ -14,14 +7,15 @@ class UsersViewModel: ObservableObject {
     @Published var isLoading: Bool = true
     @Published var currentUser: User?
     @Published var signInError: String?
-    
+
     private let db = Firestore.firestore()
     private var cancellables = Set<AnyCancellable>()
     
     init() {
-        fetchUsers() //Fetch the list of user from firestore
-        fetchCurrentUser() //  fetch the current the when the view model is initialized
-        listenForUserStatusChanges() // Start listening for user status update
+        fetchUsers()
+        fetchCurrentUser()
+        listenForUserStatusChanges()
+        // Removed last message listening
     }
     
     // Fetch the current signed-in user
@@ -33,10 +27,8 @@ class UsersViewModel: ObservableObject {
             
             userRef.getDocument { [weak self] document, error in
                 guard let self = self else { return }
+                
                 if let error = error {
-                    // Log the error for debugging
-                    
-                    print("Error fetching current user: \(error.localizedDescription)")
                     self.signInError = error.localizedDescription
                     return
                 }
@@ -55,8 +47,6 @@ class UsersViewModel: ObservableObject {
         }
     }
 
-
-    
     // Fetch all users from Firestore
     private func fetchUsers() {
         db.collection("users").getDocuments { snapshot, error in
@@ -67,7 +57,7 @@ class UsersViewModel: ObservableObject {
                 }
                 return
             }
-            
+
             guard let documents = snapshot?.documents else {
                 DispatchQueue.main.async {
                     self.signInError = "No Users Found"
@@ -75,17 +65,16 @@ class UsersViewModel: ObservableObject {
                 }
                 return
             }
-            
+
             DispatchQueue.main.async {
-                self.users = documents.compactMap { document in
-                    try? document.data(as: User.self)
-                }
+                self.users = documents.compactMap { try? $0.data(as: User.self) }
+                print("Fetched users: \(self.users.map { $0.name })") // Debugging: Check fetched user names
                 self.isLoading = false
             }
         }
     }
     
-    //Listen for real time updates on user typing and recording status
+    // Listen for real time updates on user typing and recording status
     private func listenForUserStatusChanges() {
         db.collection("users").addSnapshotListener { [weak self] snapshot, error in
             guard let self = self else { return }
@@ -96,10 +85,11 @@ class UsersViewModel: ObservableObject {
             }
             
             guard let documents = snapshot?.documents else { return }
+            
             for document in documents {
                 if let user = try? document.data(as: User.self) {
-                    // find the index of user and update thier typing/ recording status
-                    if let index = self.users.firstIndex(where: {$0.id == user.id}) {
+                    // find the index of user and update their typing/ recording status
+                    if let index = self.users.firstIndex(where: { $0.id == user.id }) {
                         self.users[index] = user
                     } else {
                         self.users.append(user) // Add user if not already in the list
@@ -108,7 +98,7 @@ class UsersViewModel: ObservableObject {
             }
         }
     }
-    
+
     // handle the logout functionality
     func handleLogout() {
         do {
@@ -119,6 +109,7 @@ class UsersViewModel: ObservableObject {
             }
         }
     }
+
     // Generate unique chat ID based on emails
     func getChatId(with otherUser: User) -> String {
         guard let currentUser = currentUser else {

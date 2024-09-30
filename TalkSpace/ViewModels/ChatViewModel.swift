@@ -9,9 +9,11 @@ import Combine
 class ChatViewModel: ObservableObject {
     @Published var messages: [Message] = []
     @Published var isRecording: Bool = false
+    @Published var audioLevel: Float = 0.0
     @Published var isTyping: Bool = false
     @Published var otherUserIsTyping: Bool = false
     @Published var otherUserIsRecording: Bool = false
+    
     
     private var cancellables = Set<AnyCancellable>()
     private var db = Firestore.firestore()
@@ -19,6 +21,8 @@ class ChatViewModel: ObservableObject {
     private var typingListener: ListenerRegistration?
     private var audioPlayer: AVAudioPlayer?
     private var audioRecorder: AVAudioRecorder?
+    
+    private var audioLevelTimer: Timer?
     
     // MARK: Load messages from Firestore
     func loadMessages(chatId: String) {
@@ -32,11 +36,14 @@ class ChatViewModel: ObservableObject {
                     print("No messages")
                     return
                 }
+                
+                // create an array of messages from firestore document
                 self?.messages = documents.compactMap { doc -> Message? in
                     guard var message = try? doc.data(as: Message.self) else { return nil }
                     message.isCurrentUser = message.senderId == self?.getCurrentUserId()
                     return message
                 }
+                
             }
     }
     
@@ -92,9 +99,13 @@ class ChatViewModel: ObservableObject {
         
         do {
             audioRecorder = try AVAudioRecorder(url: audioFilename, settings: settings)
+            audioRecorder?.isMeteringEnabled = true
             audioRecorder?.record()
             isRecording = true
             updateRecordingStatus(isRecording: true) // Update recording status in Firestore
+            
+            // start monitoring audio levels
+            audioLevelTimer = Timer.scheduledTimer(timeInterval: 0.1,repeats: true)
         } catch {
             print("Could not start recording: \(error.localizedDescription)")
         }

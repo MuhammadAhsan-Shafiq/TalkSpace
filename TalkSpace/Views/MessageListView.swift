@@ -14,21 +14,28 @@ struct MessageListView: View {
             ScrollView{
                 VStack{
                     ForEach(viewModel.messages){ message in
-                        MessageBubbleView(message: message, viewModel: viewModel)
+                        HStack{
+                            if message.isCurrentUser{
+                                Spacer()
+                                MessageBubbleView(message: message, viewModel: viewModel)
+                            } else{
+                                MessageBubbleView(message: message, viewModel: viewModel)
+                                Spacer()
+                            }
+                        }
+                        Color.clear.id("bottom")
                     }
-                    Color.clear.id("bottom")
+                    .padding(.bottom, 10)
                 }
-                .padding(.bottom, 10)
-            }
-            .onChange(of: viewModel.messages.count){
-                withAnimation{
-                    scrollViewProxy.scrollTo("bottom", anchor: .bottom)
+                .onChange(of: viewModel.messages.count){
+                    withAnimation{
+                        scrollViewProxy.scrollTo("bottom", anchor: .bottom)
+                    }
                 }
             }
         }
     }
 }
-
 #Preview {
     MessageListView(viewModel: ChatViewModel())
 }

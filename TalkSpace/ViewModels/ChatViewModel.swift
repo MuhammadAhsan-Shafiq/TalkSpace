@@ -16,8 +16,6 @@ class ChatViewModel: ObservableObject {
     @Published var currentVoiceNoteUrl: String? = nil
     @Published var isPlayingVoiceNote: Bool = false
 
-    
-    
     private var cancellables = Set<AnyCancellable>()
     private var db = Firestore.firestore()
     private var listener: ListenerRegistration?
@@ -25,12 +23,16 @@ class ChatViewModel: ObservableObject {
     private var audioPlayer: AVAudioPlayer?
     private var audioRecorder: AVAudioRecorder?
     private var audioSession: AVAudioSession = AVAudioSession.sharedInstance()
-    
     private var audioLevelTimer: Timer?
+
     
     // MARK: Load messages from Firestore
     func loadMessages(chatId: String) {
         listener?.remove()
+
+        // Determine the current user ID before setting the listener
+        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
+
         listener = db.collection("chats")
             .document(chatId)
             .collection("messages")
@@ -40,26 +42,34 @@ class ChatViewModel: ObservableObject {
                     print("Error Fetching Messages: \(error)")
                     return
                 }
-                self.messages = querySnapshot?.documents.compactMap{ document in
-                    try? document.data(as: Message.self)
+
+                // Map each document to a Message object and set `isCurrentUser` based on senderId
+                self.messages = querySnapshot?.documents.compactMap { document in
+                    if var message = try? document.data(as: Message.self) {
+                        // Copy the message object and modify `isCurrentUser` in the copy
+                        message.isCurrentUser = message.senderId == currentUserId
+                        return message
+                    }
+                    return nil
                 } ?? []
             }
     }
     
+    // MARK: Send Message Function
     func sendMessage(text: String? = nil, imageUrl: String? = nil, voiceNoteUrl: String? = nil, chatId: String) {
         guard let currentUserId = Auth.auth().currentUser?.uid else { return }
-        
+
+        // Set isCurrentUser to true since this function sends messages from the current user
         let message = Message(
             text: text,
             imageUrl: imageUrl,
             voiceNoteUrl: voiceNoteUrl,
-            isCurrentUser: true,
             senderId: currentUserId,
             timestamp: Timestamp(date: Date())
         )
-        
+
         do {
-            // Attempt to add the document, marking with `try`
+            // Attempt to add the document
             try db.collection("chats").document(chatId).collection("messages").addDocument(from: message) { error in
                 if let error = error {
                     print("Error saving message: \(error.localizedDescription)")
@@ -68,24 +78,22 @@ class ChatViewModel: ObservableObject {
                 }
             }
         } catch {
-            // Handle any errors during serialization or Firestore document creation
             print("Failed to send message: \(error.localizedDescription)")
         }
     }
-
 
 
     // MARK: Upload image function
     func uploadImage(image: UIImage, chatId: String) {
         let storageRef = Storage.storage().reference().child("chat_images/\(UUID().uuidString).jpg")
         guard let imageData = image.jpegData(compressionQuality: 0.8) else { return }
-        
+
         storageRef.putData(imageData, metadata: nil) { [weak self] _, error in
             guard error == nil else {
                 print("Error uploading image: \(String(describing: error))")
                 return
             }
-            
+
             storageRef.downloadURL { url, error in
                 guard let imageUrl = url?.absoluteString, error == nil else { return }
                 self?.sendMessage(imageUrl: imageUrl, chatId: chatId)

@@ -53,10 +53,7 @@ struct MessageBubbleView: View {
             Text(text)
                 .padding(3)
                 .foregroundColor(.black)
-                //.background(Color.white.opacity(0.8))
-//                .cornerRadius(15)
                 .padding(10)
-                //.padding(.vertical, 5)
         } else if let imageUrl = message.imageUrl {
             AsyncImage(url: URL(string: imageUrl)) { image in
                 image
@@ -103,7 +100,6 @@ struct MessageBubbleView: View {
 #Preview {
     let sampleMessage = Message(
         text: "Hello, world!",
-        isCurrentUser: true,
         senderId: "userId",
         timestamp: Timestamp(date: Date())
     )

@@ -45,7 +45,9 @@ struct ChatView: View {
                         viewModel.updateTypingStatus(isTyping: isTyping)
                     }
                 )
+                
             }
+            
             .contentShape(Rectangle())
             .onTapGesture {
                 UIApplication.shared.hideKeyboard()

@@ -18,8 +18,8 @@ struct User: Identifiable, Decodable, Hashable {
     
     // get the first letter of each word in the name and joins them up as initials
     var initials: String {
-        let nameComponents = name.split(separator: " ").map { String($0.prefix(1)) }
-        return nameComponents.joined().uppercased()
+        let nameComponents = name.split(separator: " ").compactMap { String($0.prefix(1)).uppercased() }
+        return nameComponents.joined()
     }
 }
 

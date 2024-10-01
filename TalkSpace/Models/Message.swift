@@ -25,6 +25,6 @@ struct Message: Codable, Identifiable,Equatable {
         self.voiceNoteUrl = voiceNoteUrl
         self.isCurrentUser = isCurrentUser
         self.senderId = senderId
-        self.timestamp = timestamp
+        self.timestamp = Timestamp(date: Date())
     }
 }

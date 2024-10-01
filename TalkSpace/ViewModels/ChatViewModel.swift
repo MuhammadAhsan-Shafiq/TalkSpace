@@ -13,6 +13,9 @@ class ChatViewModel: ObservableObject {
     @Published var isTyping: Bool = false
     @Published var otherUserIsTyping: Bool = false
     @Published var otherUserIsRecording: Bool = false
+    @Published var currentVoiceNoteUrl: String? = nil
+    @Published var isPlayingVoiceNote: Bool = false
+
     
     
     private var cancellables = Set<AnyCancellable>()
@@ -21,6 +24,7 @@ class ChatViewModel: ObservableObject {
     private var typingListener: ListenerRegistration?
     private var audioPlayer: AVAudioPlayer?
     private var audioRecorder: AVAudioRecorder?
+    private var audioSession: AVAudioSession = AVAudioSession.sharedInstance()
     
     private var audioLevelTimer: Timer?
     
@@ -31,24 +35,17 @@ class ChatViewModel: ObservableObject {
             .document(chatId)
             .collection("messages")
             .order(by: "timestamp")
-            .addSnapshotListener { [weak self] querySnapshot, error in
-                guard let documents = querySnapshot?.documents else {
-                    print("No messages")
+            .addSnapshotListener { querySnapshot, error in
+                if let error = error {
+                    print("Error Fetching Messages: \(error)")
                     return
                 }
-                
-                // create an array of messages from firestore document
-                self?.messages = documents.compactMap { doc -> Message? in
-                    guard var message = try? doc.data(as: Message.self) else { return nil }
-                    message.isCurrentUser = message.senderId == self?.getCurrentUserId()
-                    return message
-                }
-                
+                self.messages = querySnapshot?.documents.compactMap{ document in
+                    try? document.data(as: Message.self)
+                } ?? []
             }
     }
     
-    
-    // MARK: Function for sending message
     func sendMessage(text: String? = nil, imageUrl: String? = nil, voiceNoteUrl: String? = nil, chatId: String) {
         guard let currentUserId = Auth.auth().currentUser?.uid else { return }
         
@@ -62,13 +59,22 @@ class ChatViewModel: ObservableObject {
         )
         
         do {
-            _ = try db.collection("chats").document(chatId).collection("messages").addDocument(from: message)
+            // Attempt to add the document, marking with `try`
+            try db.collection("chats").document(chatId).collection("messages").addDocument(from: message) { error in
+                if let error = error {
+                    print("Error saving message: \(error.localizedDescription)")
+                } else {
+                    print("Message successfully sent!")
+                }
+            }
         } catch {
-            print("Error saving message: \(error)")
+            // Handle any errors during serialization or Firestore document creation
+            print("Failed to send message: \(error.localizedDescription)")
         }
     }
-    
-    
+
+
+
     // MARK: Upload image function
     func uploadImage(image: UIImage, chatId: String) {
         let storageRef = Storage.storage().reference().child("chat_images/\(UUID().uuidString).jpg")
@@ -105,7 +111,11 @@ class ChatViewModel: ObservableObject {
             updateRecordingStatus(isRecording: true) // Update recording status in Firestore
             
             // start monitoring audio levels
-            audioLevelTimer = Timer.scheduledTimer(timeInterval: 0.1,repeats: true)
+            audioLevelTimer = Timer.scheduledTimer(withTimeInterval: 0.1,repeats: true){ [weak self] _ in
+                self?.audioRecorder?.updateMeters()
+                self?.audioLevel = self?.audioRecorder?.averagePower(forChannel: 0) ?? 0
+            }
+            updateRecordingStatus(isRecording: true)
         } catch {
             print("Could not start recording: \(error.localizedDescription)")
         }
@@ -115,11 +125,13 @@ class ChatViewModel: ObservableObject {
     func stopRecording(completion: @escaping (String?) -> Void) {
         audioRecorder?.stop()
         isRecording = false
+        audioLevelTimer?.invalidate() // Stop the audio level timer
         
         guard let url = audioRecorder?.url else { return completion(nil) }
         uploadVoiceNote(url: url, completion: completion)
         updateRecordingStatus(isRecording: false) // Update recording status in Firestore
     }
+    
     // MARK: Update Typing Status Function
     func updateTypingStatus(isTyping: Bool) {
         self.isTyping = isTyping
@@ -158,7 +170,7 @@ class ChatViewModel: ObservableObject {
     
     // MARK: Upload Voice Note
     func uploadVoiceNote(url: URL, completion: @escaping (String?) -> Void) {
-        guard let currentUserId = getCurrentUserId() else { return }
+        guard getCurrentUserId() != nil else { return }
         
         let storageRef = Storage.storage().reference().child("voice_notes/\(UUID().uuidString).m4a")
         
@@ -187,11 +199,14 @@ class ChatViewModel: ObservableObject {
         return paths[0]
     }
     
-    // MARK: Play voice note
     func playVoiceNote(url: String) {
-        guard let url = URL(string: url) else { return }
-        
+        guard let url = URL(string: url) else {
+            print("Invalid URL: \(url)")
+            return
+        }
+
         do {
+            print("Playing audio from: \(url)") // Log the URL
             audioPlayer = try AVAudioPlayer(contentsOf: url)
             audioPlayer?.play()
         } catch {

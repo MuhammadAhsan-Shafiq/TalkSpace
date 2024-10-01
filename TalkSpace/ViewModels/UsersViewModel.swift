@@ -22,7 +22,6 @@ class UsersViewModel: ObservableObject {
     private func fetchCurrentUser() {
         if let user = Auth.auth().currentUser {
             let userID = user.uid
-            print("Fetching user with UID: \(userID)") // Debugging line
             let userRef = db.collection("users").document(userID)
             
             userRef.getDocument { [weak self] document, error in
@@ -68,7 +67,6 @@ class UsersViewModel: ObservableObject {
 
             DispatchQueue.main.async {
                 self.users = documents.compactMap { try? $0.data(as: User.self) }
-                print("Fetched users: \(self.users.map { $0.name })") // Debugging: Check fetched user names
                 self.isLoading = false
             }
         }

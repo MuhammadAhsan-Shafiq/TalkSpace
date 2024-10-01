@@ -222,20 +222,9 @@ struct UsersScreenView: View {
     // MARK: - Chat Row View
     private func chatRow(for user: User) -> some View {
         HStack {
-            UserRowView(user: user, lastMessage: nil, timeStamp: nil) // No last message or timestamp
+            UserRowView(user: user,timeStamp: nil) // No last message or timestamp
                 .padding(.vertical, 10) // Add vertical padding for spacing
             Spacer()
-        }
-    }
-    // Helper function to format timestamps
-    private func formatTimestamp(_ timestamp: Date) -> String {
-        let calendar = Calendar.current
-        if calendar.isDateInToday(timestamp) {
-            return DateFormatter.localizedString(from: timestamp, dateStyle: .none, timeStyle: .short)
-        } else if calendar.isDateInYesterday(timestamp) {
-            return "Yesterday"
-        } else {
-            return DateFormatter.localizedString(from: timestamp, dateStyle: .medium, timeStyle: .none)
         }
     }
     

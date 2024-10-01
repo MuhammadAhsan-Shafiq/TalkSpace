@@ -54,6 +54,7 @@ struct UserHeaderView: View {
                 Image(systemName: "ellipsis")
                     .rotationEffect(.degrees(90))
             }
+            .foregroundColor(.black)
             .font(.title2)
             .fontWeight(.bold)
         }

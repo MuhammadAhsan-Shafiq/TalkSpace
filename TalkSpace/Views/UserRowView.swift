@@ -3,7 +3,6 @@ import SwiftUI
 // UserRowView
 struct UserRowView: View {
     let user: User
-    let lastMessage: String? // pass in the last message as a parameter
     let timeStamp: String? // add time stamp as parameter
     
     var body: some View {
@@ -33,13 +32,7 @@ struct UserRowView: View {
                         Text("Recording audio...")
                             .font(.subheadline)
                             .foregroundColor(.orange)
-                    } else {
-                        // Display the last message or a placeholder if none exist
-                        Text(lastMessage ?? "No messages yet")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                            .lineLimit(1) // Limit to a single line
-                    }
+                    } 
                 }
                 
                 // Display timestamp
@@ -60,7 +53,6 @@ struct UserRowView: View {
 #Preview {
     UserRowView(
         user: User(id: "1", name: "John Doe", email: "john@example.com", isTyping: false, isRecording: false),
-        lastMessage: "Hello! How are you?",
         timeStamp: "2 minutes ago" // Add a sample timestamp
     )
 }

@@ -29,24 +29,33 @@ struct FullScreenImageView: View {
                         }
                     }
             } placeholder: {
-                ProgressView()
+                // Placeholder with adaptive style
+                ZStack {
+                    Color(UIColor.systemGray6) // Use a system gray color
+                    ProgressView()
+                        .scaleEffect(1.5)
+                }
             }
             
+          
+            // Close button in the top-right corner
             Button(action: {
-                withAnimation(.spring()){
+                withAnimation(.spring()) {
                     isFullScreen = false
                 }
-            }){
+            }) {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundStyle(.white)
                     .font(.system(size: 30))
                     .padding()
+                    .background(Color.black.opacity(0.3)) // Background to ensure visibility
+                    .clipShape(Circle())
             }
+            .padding([.top, .trailing], 20) // Add spacing from the top and trailing edges
         }
     }
 }
 
-
-//#Preview {
-//    FullScreenImageView(imageUrl: imageUrl, isFullScreen: <#Binding<Bool>#>, namespace: <#Namespace.ID#>)
-//}
+#Preview {
+    FullScreenImageView(imageUrl: "https://example.com/sample-image.jpg", isFullScreen: .constant(true), namespace: Namespace().wrappedValue)
+}

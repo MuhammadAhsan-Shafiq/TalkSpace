@@ -1,10 +1,3 @@
-//
-//  ValidationRequirement.swift
-//  TalkSpace
-//
-//  Created by MacBook Pro on 24/09/2024.
-//
-
 import SwiftUI
 
 // Validation requirement view used for displaying the validation requirements
@@ -15,15 +8,19 @@ struct ValidationRequirement: View {
     var body: some View {
         HStack {
             Image(systemName: isValid ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundColor(isValid ? .green : .red)
+                .foregroundColor(isValid ? Color.green : Color.red)
             Text(text)
                 .font(.footnote)
-                .foregroundColor(.black)
+                .foregroundColor(Color.primary) // Use adaptive color for text
         }
         .padding(.vertical, 2)
     }
 }
 
+// Preview for ValidationRequirement
 #Preview {
-    ValidationRequirement(text: "hello", isValid: true)
+    VStack {
+        ValidationRequirement(text: "Valid email address", isValid: true)
+        ValidationRequirement(text: "Invalid password", isValid: false)
+    }
 }

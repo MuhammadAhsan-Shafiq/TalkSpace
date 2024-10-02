@@ -32,9 +32,7 @@ struct UsersScreenView: View {
                 switch selectedTab {
                 case .chat:
                     chatTab
-                        .overlay(
-                        floatingButtons
-                        )
+                        .overlay(floatingButtons)
                 case .updates:
                     updatesTab
                 case .communities:
@@ -45,8 +43,6 @@ struct UsersScreenView: View {
                 
                 Spacer() // Pushes the content up, leaving space for the tab bar
                 
-
-                
                 // Custom Tab Bar
                 HStack {
                     tabButton(title: "Chat", selectedImage: "bubble.left.fill",unselectedImage: "bubble.left", tab: .chat)
@@ -55,8 +51,11 @@ struct UsersScreenView: View {
                     tabButton(title: "Calls", selectedImage: "phone.fill",unselectedImage: "phone", tab: .calls)
                 }
                 .padding(.bottom, 10) // Add padding to the bottom of the tab bar
+                .background(Color(UIColor.tertiarySystemBackground)) // Background for the tab bar
             }
+            .background(Color(UIColor.systemBackground))
         }
+        .accentColor(customAccentColor)
     }
     
     // MARK: - Chat Tab View
@@ -194,7 +193,7 @@ struct UsersScreenView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
-        .background(Color.gray.opacity(0.1))
+        .background(Color(UIColor.secondarySystemBackground))
         .cornerRadius(30)
     }
     
@@ -253,21 +252,21 @@ struct UsersScreenView: View {
     private var updatesTab: some View {
         Text("Updates View")
             .font(.largeTitle)
-            .foregroundColor(.black)
+            .foregroundColor(.primary)
     }
     
     // MARK: - Communities Tab View
     private var communitiesTab: some View {
         Text("Communities View")
             .font(.largeTitle)
-            .foregroundColor(.black)
+            .foregroundColor(.primary)
     }
     
     // MARK: - Calls Tab View
     private var callsTab: some View {
         Text("Calls View")
             .font(.largeTitle)
-            .foregroundColor(.black)
+            .foregroundColor(.primary)
     }
 }
 

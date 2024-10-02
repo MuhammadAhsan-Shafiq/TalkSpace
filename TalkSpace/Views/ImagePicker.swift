@@ -39,5 +39,15 @@ struct ImagePicker: UIViewControllerRepresentable {
             }
             picker.dismiss(animated: true)
         }
+        
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            picker.dismiss(animated: true)
+        }
     }
+}
+
+// Preview for ImagePicker
+#Preview {
+    @Previewable @State var selectedImage: UIImage? = nil
+    ImagePicker(selectedImage: $selectedImage)
 }

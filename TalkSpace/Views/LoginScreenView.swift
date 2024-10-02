@@ -6,6 +6,7 @@ struct LoginScreenView: View {
     
     @EnvironmentObject private var sessionManager: SessionManager // Use environment object for session management
     @ObservedObject private var viewModel: AuthViewModel // StateObject for AuthViewModel
+    @Environment(\.colorScheme) var colorScheme // get the current color scheme
     
     init(viewModel: AuthViewModel) {
         self.viewModel = viewModel
@@ -19,6 +20,8 @@ struct LoginScreenView: View {
                     .environmentObject(sessionManager) // Pass the session manager
             } else {
                 ZStack {
+                    // background color based on current color scheme
+                    colorScheme == .dark ? Color.black.ignoresSafeArea() : Color.white.ignoresSafeArea()
                     VStack {
                         // Main title
                         headerView
@@ -43,7 +46,7 @@ struct LoginScreenView: View {
     private var headerView: some View {
         Text("TalkSpace")
             .font(.system(size: 50, weight: .bold, design: .rounded))
-            .foregroundColor(.black)
+            .foregroundColor(colorScheme == .dark ? .white : .black )
             .shadow(radius: 15)
     }
     
@@ -52,7 +55,7 @@ struct LoginScreenView: View {
         VStack(alignment: .center, spacing: 15) {
             Text("Login")
                 .font(.system(size: 30, weight: .bold, design: .rounded))
-                .foregroundColor(.black)
+                .foregroundColor(colorScheme == .dark ? .white : .black)
                 .shadow(radius: 15)
             
             VStack(alignment: .leading){
@@ -83,7 +86,7 @@ struct LoginScreenView: View {
             loginActions
         }
         .padding()
-        .background(Color.black.opacity(0.1))
+        .background(colorScheme == .dark ? Color.gray.opacity(0.2) : Color.black.opacity(0.1)) // Form background color
         .cornerRadius(20)
         .shadow(radius: 15)
     }
@@ -105,7 +108,7 @@ struct LoginScreenView: View {
             Toggle(isOn: $viewModel.rememberMe) {
                 Text("Remember me")
                     .font(.system(size: 25))
-                    .foregroundColor(.black)
+                    .foregroundColor(colorScheme == .dark ? .white : .black) // Toggle text color
             }
             Spacer()
         }
@@ -119,7 +122,7 @@ struct LoginScreenView: View {
                 // Handle forget password action
             }
             .font(.footnote)
-            .foregroundColor(.black)
+            .foregroundColor(colorScheme == .dark ? .white : .black) // Forget password button text color
             .padding(8)
             
             Button(action: { viewModel.signInUser() }) {
@@ -146,7 +149,7 @@ struct LoginScreenView: View {
     // Link to the SignUpScreenView
     private var signUpLink: some View {
         NavigationLink("Don't have an account? Sign Up", destination: SignUpScreenView(viewModel: viewModel))
-            .foregroundColor(.black)
+            .foregroundColor(colorScheme == .dark ? .white : .black) // Sign up link color
             .font(.footnote)
     }
 }

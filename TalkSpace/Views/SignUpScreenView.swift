@@ -5,19 +5,23 @@ struct SignUpScreenView: View {
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var sessionManager: SessionManager // Managing user sessions
     @StateObject var viewModel: AuthViewModel
+    @Environment(\.colorScheme) var colorScheme // Access current color scheme
+    
     var body: some View {
         NavigationStack {
             ZStack {
+                Color(colorScheme == .dark ? .black : .white)
+                    .ignoresSafeArea() // Make sure it covers the entire screen
                 VStack {
                     Text("TalkSpace")
                         .font(.system(size: 50, weight: .bold, design: .rounded))
-                        .foregroundColor(.black)
+                        .foregroundColor(colorScheme == .dark ? .white : .black) // Title color based on color scheme
                         .shadow(radius: 15)
                     Spacer()
                     VStack {
                         Text("Sign Up")
                             .font(.system(size: 30, weight: .bold, design: .rounded))
-                            .foregroundColor(.black)
+                            .foregroundColor(colorScheme == .dark ? .white : .black) // Sign Up title color
                             .shadow(radius: 15)
                         
                         VStack(alignment: .leading, spacing: 15) {
@@ -77,7 +81,7 @@ struct SignUpScreenView: View {
                             }
                         }
                         .padding()
-                        .background(Color.black.opacity(0.1))
+                        .background(colorScheme == .dark ? Color.gray.opacity(0.2) : Color.black.opacity(0.1)) // Input field background
                         .cornerRadius(20)
                         .shadow(radius: 15)
                     }
@@ -85,7 +89,7 @@ struct SignUpScreenView: View {
                     Button("Back to Sign In") {
                         presentationMode.wrappedValue.dismiss()
                     }
-                    .foregroundColor(.black)
+                    .foregroundColor(colorScheme == .dark ? .white : .black) // Button color based on color scheme
                     .font(.footnote)
                 }
                 .padding()

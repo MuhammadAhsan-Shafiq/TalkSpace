@@ -22,7 +22,7 @@ struct AudioVisualizerView: View {
         }
         .frame(height: 100)
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(Color(UIColor.secondarySystemBackground))
         .cornerRadius(10)
     }
 }
@@ -41,6 +41,12 @@ struct BarView: View {
             .frame(width: 4, height: barHeight)
             .cornerRadius(2)
             .animation(.linear(duration: 0.1), value: barHeight)
+            .accessibilityLabel("Audio level at bar \(index + 1): \(Int(normalizedLevel * 100)) percent") // Accessibility label
     }
+}
+// Preview for AudioVisualizerView
+#Preview {
+    @Previewable @State var audioLevel: Float = 0.0 // Example audio level for preview
+    AudioVisualizerView(audioLevel: $audioLevel)
 }
 

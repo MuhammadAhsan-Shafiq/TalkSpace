@@ -80,6 +80,9 @@ struct EmojiPickerView: View {
                 ForEach(emojis, id: \.self) { emoji in
                     Text(emoji)
                         .font(.largeTitle)
+                        .background(Color(UIColor.systemBackground))
+                        .cornerRadius(10)
+                        .shadow(radius: 3)
                         .onTapGesture {
                             selectedEmoji += emoji // Append the emoji to the message
                         }
@@ -88,7 +91,8 @@ struct EmojiPickerView: View {
             .padding()
         }
         .frame(height: 250)
-        .background(Color.gray.opacity(0.1))
+        .padding(.all,1)
+        .background(Color(UIColor.systemGroupedBackground))
         .cornerRadius(10)
         .shadow(radius: 10)
     }

@@ -17,6 +17,7 @@ struct CustomInputField: View {
     var toggleVisibility: (() -> Void)? = nil
     var keyboardType: UIKeyboardType = .default
     var onEditingChanged: ((Bool) -> Void)? = nil
+    @Environment(\.colorScheme) var colorScheme // Access current color scheme
     
     var body: some View {
         HStack {
@@ -24,13 +25,17 @@ struct CustomInputField: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 30, height: 30)
-
+                        .foregroundColor(colorScheme == .dark ? .white : .black) // Icon color
+            
                     if isSecure, let isPasswordVisible = isPasswordVisible, isPasswordVisible {
                         TextField(placeholder, text: $text)
+                            .foregroundColor(colorScheme == .dark ? .white : .black) // Text color
                     } else if isSecure {
                         SecureField(placeholder, text: $text)
+                            .foregroundColor(colorScheme == .dark ? .white : .black) // Text color
                     } else {
                         TextField(placeholder, text: $text)
+                            .foregroundColor(colorScheme == .dark ? .white : .black) // Text color
                     }
                 }
         .keyboardType(keyboardType)
@@ -38,9 +43,9 @@ struct CustomInputField: View {
         .foregroundColor(.black)
         .frame(height: 25)
         .padding(5)
-        .background(Color.white.opacity(0.2))
+        .background(colorScheme == .dark ? Color.black.opacity(0.7) : Color.white.opacity(0.7)) // Background color
         .cornerRadius(8)
-        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.black, lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 1)) // Border color
         .overlay(
             HStack {
                 Spacer()
@@ -49,7 +54,7 @@ struct CustomInputField: View {
                         toggleVisibility?()
                     }) {
                         Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
-                            .foregroundColor(.black)
+                            .foregroundColor(colorScheme == .dark ? .white : .black) // Button icon color
                     }
                     .padding(.trailing, 8)
                 }

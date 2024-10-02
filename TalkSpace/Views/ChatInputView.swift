@@ -25,15 +25,14 @@ struct ChatInputView: View {
                     }){
                         Image(systemName: "face.smiling")
                             .font(.system(size: 24))
-                            .foregroundColor(.black)
+                            .foregroundColor(.primary)
                     }
                     
                     // TextEditor with dynamic height
                     TextEditor(text: $message)
                         .focused($isTextEditorFocused)
                         .frame(minHeight: textEditorHeight, maxHeight: textEditorHeight) // Set height limits
-                        .padding(10)
-                        .background(Color.white.opacity(0.2))
+                        .background(Color(.secondarySystemBackground))
                         .cornerRadius(10)
                         .onChange(of: message) { oldVlue, newValue in
                             // Trigger typing status when message changes
@@ -51,7 +50,7 @@ struct ChatInputView: View {
                     Button(action: { showImagePicker = true }) {
                         Image(systemName: "photo")
                             .font(.system(size: 24))
-                            .foregroundColor(.black)
+                            .foregroundColor(.primary)
                     }
                     .padding(.horizontal, 5)
                     
@@ -61,12 +60,12 @@ struct ChatInputView: View {
                     }) {
                         Image(systemName: "camera")
                             .font(.system(size: 24))
-                            .foregroundColor(.black)
+                            .foregroundColor(.primary)
                     }
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal)
-                .background(Color.white)
+                .background(Color(.systemBackground))
                 .cornerRadius(30)
                 .shadow(radius: 10)
                 
@@ -76,7 +75,7 @@ struct ChatInputView: View {
                         Button(action: {}) {
                             Image(systemName: "mic.circle.fill")
                                 .font(.system(size: 40))
-                                .background(Color.white)
+                                .background(Color(.systemBackground))
                                 .foregroundColor(.green)
                                 .cornerRadius(30)
                         }
@@ -98,7 +97,7 @@ struct ChatInputView: View {
                             }) {
                                 Image(systemName: "paperplane.circle.fill")
                                     .font(.system(size: 40))
-                                    .background(Color.white)
+                                    .background(Color(.systemBackground))
                                     .foregroundColor(.green)
                                     .cornerRadius(30)
                             }
